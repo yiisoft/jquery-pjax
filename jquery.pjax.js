@@ -386,7 +386,7 @@
 //
 // Returns nothing.
 	function locationReplace(url) {
-		if(!options.history) return;
+		if(!pjax.options.history) return;
 		window.history.replaceState(null, "", "#")
 		window.location.replace(url)
 	}
