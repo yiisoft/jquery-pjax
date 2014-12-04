@@ -4,6 +4,7 @@ yii-pjax Change Log
 
 2.0.1 Oct 10, 2014
 ------------------
+- Bug #12: File uploading fix
 - Bug #9: Fixed missing history option in default settings (tonydspaniard)
 - New #11: add new option "cache" (macklay)
 
