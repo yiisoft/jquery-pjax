@@ -780,7 +780,7 @@ function extractContainer(data, xhr, options) {
 //
 // Returns nothing.
 function cachePush(id, value) {
-		if(!pjax.options.cache) {
+		if(!pjax.defaults.cache) {
 			return;
 		}
   cacheMapping[id] = value
@@ -803,7 +803,7 @@ function cachePush(id, value) {
 //
 // Returns nothing.
 function cachePop(direction, id, value) {
-		if(!pjax.options.cache) {
+		if(!pjax.defaults.cache) {
 			return;
 		}
   var pushStack, popStack
