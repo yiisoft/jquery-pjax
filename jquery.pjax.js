@@ -363,7 +363,7 @@ function pjax(options) {
   abortXHR(pjax.xhr)
 
   // Strip _pjax parameter from URL, if exists.
-  options.url = stripPjaxParam(options.url);
+  options.url = stripInternalParams(options.url);
   pjax.options = options
   var xhr = pjax.xhr = $.ajax(options)
 
