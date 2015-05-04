@@ -296,7 +296,8 @@ function pjax(options) {
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cache: options.cache
     }
 
     if (options.history && (options.push || options.replace)) {
@@ -354,7 +355,8 @@ function pjax(options) {
       title: document.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cache: options.cache
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -480,6 +482,7 @@ function onPjaxPopstate(event) {
         push: false,
         fragment: state.fragment,
         timeout: state.timeout,
+        cache: state.cache,
         scrollTo: false
       }
 
