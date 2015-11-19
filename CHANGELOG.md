@@ -1,6 +1,10 @@
 yii-pjax Change Log
 ===================
 
+2.0.6 Under development
+-----------------
+- New: Added `skipOuter` option (silverfire)
+
 2.0.3 Mar 7, 2015
 -----------------
 - Chg: Merged changes from upstream (samdark)

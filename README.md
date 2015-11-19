@@ -164,6 +164,7 @@ key | default | description
 `url` | link.href | a string or function that returns the URL for the ajax request
 `target` | link | eventually the `relatedTarget` value for [pjax events](#events)
 `fragment` | | CSS selector for the fragment to extract from ajax response
+`skipOuter` | false | When pjax containters are nested and this option is true, the closest pjax block will handle the event. Otherwise, the top container will handle the event
 
 You can change the defaults globally by writing to the `$.pjax.defaults` object:
 

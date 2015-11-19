@@ -28,6 +28,9 @@
 //           cache - Whether to cache pages HTML. Defaults to true
 //    pushRedirect - Whether to pushState the URL for redirects. Defaults to false.
 // replaceRedirect - Whether to replaceState the URL for redirects. Defaults to true.
+//       skipOuter - When pjax containters are nested and this option is true,
+//                   the closest pjax block will handle the event. Otherwise, the top
+//                   container will handle the event. Defaults to false.
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -366,6 +369,10 @@ function pjax(options) {
     window.history.replaceState(pjax.state, document.title)
   }
 
+  // New request can not override the existing one when option skipOuter is set to true
+  if (pjax.xhr && pjax.xhr.readyState < 4 && pjax.options.skipOuter) {
+    return
+  }
   // Cancel the current request if we're already pjaxing
   abortXHR(pjax.xhr)
 
@@ -918,6 +925,7 @@ function enable() {
     version: findVersion,
     pushRedirect: false,
     replaceRedirect: true
+    skipOuter: false,
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
