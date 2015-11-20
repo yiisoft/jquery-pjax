@@ -4,6 +4,7 @@ yii-pjax Change Log
 2.0.6 Under development
 -----------------
 - Enh #25: Blur the focused element if it's inside Pjax container (GeorgeGardiner)
+- New: Added `skipOuter` option (silverfire)
 
 2.0.3 Mar 7, 2015
 -----------------

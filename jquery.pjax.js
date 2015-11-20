@@ -19,15 +19,18 @@
 // pjax specific options:
 //
 //
-//       container - Where to stick the response body. Usually a String selector.
-//                   $(container).html(xhr.responseBody)
-//                   (default: current jquery context)
-//            push - Whether to pushState the URL. Defaults to true (of course).
-//         replace - Want to use replaceState instead? That's cool.
-//         history - Work with window.history. Defaults to true
-//           cache - Whether to cache pages HTML. Defaults to true
-//    pushRedirect - Whether to pushState the URL for redirects. Defaults to false.
-// replaceRedirect - Whether to replaceState the URL for redirects. Defaults to true.
+//           container - Where to stick the response body. Usually a String selector.
+//                       $(container).html(xhr.responseBody)
+//                       (default: current jquery context)
+//                push - Whether to pushState the URL. Defaults to true (of course).
+//             replace - Want to use replaceState instead? That's cool.
+//             history - Work with window.history. Defaults to true
+//               cache - Whether to cache pages HTML. Defaults to true
+//        pushRedirect - Whether to pushState the URL for redirects. Defaults to false.
+//     replaceRedirect - Whether to replaceState the URL for redirects. Defaults to true.
+// skipOuterContainers - When pjax containers are nested and this option is true,
+//                       the closest pjax block will handle the event. Otherwise, the top
+//                       container will handle the event. Defaults to false.
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -371,6 +374,10 @@ function pjax(options) {
     window.history.replaceState(pjax.state, document.title)
   }
 
+  // New request can not override the existing one when option skipOuterContainers is set to true
+  if (pjax.xhr && pjax.xhr.readyState < 4 && pjax.options.skipOuterContainers) {
+    return
+  }
   // Cancel the current request if we're already pjaxing
   abortXHR(pjax.xhr)
 
@@ -922,7 +929,8 @@ function enable() {
     maxCacheLength: 20,
     version: findVersion,
     pushRedirect: false,
-    replaceRedirect: true
+    replaceRedirect: true,
+    skipOuterContainers: false
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
