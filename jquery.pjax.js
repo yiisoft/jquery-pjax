@@ -307,7 +307,8 @@ function pjax(options) {
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cache: options.cache
     }
 
     if (options.history && (options.push || options.replace)) {
@@ -370,7 +371,8 @@ function pjax(options) {
       title: document.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cache: options.cache
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -481,7 +483,18 @@ function onPjaxPopstate(event) {
     if (container.length) {
       var contents = cacheMapping[state.id]
 
-      if (previousState) {
+      var options = {
+        id: state.id,
+        url: state.url,
+        container: container,
+        push: false,
+        fragment: state.fragment,
+        timeout: state.timeout,
+        cache: state.cache,
+        scrollTo: false
+      }
+
+      if (previousState && options.cache) {
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, previousState.id, cloneContents(container))
@@ -493,15 +506,6 @@ function onPjaxPopstate(event) {
       })
       container.trigger(popstateEvent)
 
-      var options = {
-        id: state.id,
-        url: state.url,
-        container: container,
-        push: false,
-        fragment: state.fragment,
-        timeout: state.timeout,
-        scrollTo: false
-      }
 
       if (contents) {
         container.trigger('pjax:start', [null, options])
@@ -884,9 +888,6 @@ function cachePush(id, value) {
 //
 // Returns nothing.
 function cachePop(direction, id, value) {
-  if(!pjax.options.cache) {
-    return;
-  }
   var pushStack, popStack
   cacheMapping[id] = value
 
