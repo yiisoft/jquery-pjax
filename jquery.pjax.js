@@ -133,14 +133,15 @@ function handleSubmit(event, container, options) {
   options = optionsFor(container, options)
 
   var form = event.currentTarget
+  var $form = $(form)
 
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
 
   var defaults = {
-    type: form.method.toUpperCase(),
-    url: form.action,
-    container: $(form).attr('data-pjax'),
+    type: ($form.attr('method') || 'GET').toUpperCase(),
+    url: $form.attr('action'),
+    container: $form.attr('data-pjax'),
     target: form
   }
 
@@ -241,8 +242,8 @@ function pjax(options) {
     }
 
     var url = parseURL(settings.url)
-    url.hash = hash
-    options.requestUrl = stripInternalParams(url.href)
+    if (hash) url.hash = hash
+    options.requestUrl = stripInternalParams(url)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -460,14 +461,13 @@ function onPjaxPopstate(event) {
 
   var previousState = pjax.state
   var state = event.state
+  var direction
 
   if (state && state.container) {
     // When coming forward from a separate history session, will get an
     // initial pop with a state we are already at. Skip reloading the current
     // page.
     if (initialPop && initialURL == state.url) return
-
-    var direction, containerSelector = state.container
 
     if (previousState) {
       // If popping back to the same state, just skip.
@@ -476,13 +476,12 @@ function onPjaxPopstate(event) {
 
       // Since state IDs always increase, we can deduce the navigation direction
       direction = previousState.id < state.id ? 'forward' : 'back'
-      if (direction == 'back') containerSelector = previousState.container
     }
 
-    var container = $(containerSelector)
-    if (container.length) {
-      var contents = cacheMapping[state.id]
+    var cache = cacheMapping[state.id] || []
+    var container = $(cache[0] || state.container), contents = cache[1]
 
+    if (container.length) {
       var options = {
         id: state.id,
         url: state.url,
@@ -505,7 +504,6 @@ function onPjaxPopstate(event) {
         direction: direction
       })
       container.trigger(popstateEvent)
-
 
       if (contents) {
         container.trigger('pjax:start', [null, options])
@@ -602,25 +600,15 @@ function cloneContents(container) {
   cloned.find('script').each(function(){
     if (!this.src) jQuery._data(this, 'globalEval', false)
   })
-  return cloned.contents()
+  return [container.selector, cloned.contents()]
 }
 
-// Internal: Strips named query param from url
+// Internal: Strip internal query params from parsed URL.
 //
-// url - String
-//
-// Returns String.
-function stripParam(url, name) {
-  return url
-    .replace(new RegExp('[?&]' + name + '=[^&#]*'), '')
-    .replace(/[?&]($|#)/, '\1')
-    .replace(/[?&]/, '?')
-}
-
+// Returns sanitized url.href String.
 function stripInternalParams(url) {
-  url = stripParam(url, '_pjax')
-  url = stripParam(url, '_')
-  return url
+  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '')
+  return url.href.replace(/\?($|#)/, '$1')
 }
 
 // Internal: Parse URL components and returns a Locationish object.
@@ -737,7 +725,7 @@ function extractContainer(data, xhr, options) {
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
-  obj.url = serverUrl ? stripInternalParams(serverUrl) : options.requestUrl
+  obj.url = serverUrl ? stripInternalParams(parseURL(serverUrl)) : options.requestUrl
 
   // Attempt to parse response html into elements
   if (fullDocument) {
