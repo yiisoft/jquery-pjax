@@ -3,6 +3,7 @@ yii-pjax Change Log
 
 2.0.6 Under development
 -----------------
+- Bug #23: Fixed loading of scripts in pjax containers (nkovacs, silverfire)
 - Enh #25: Blur the focused element if it's inside Pjax container (GeorgeGardiner)
 
 2.0.3 Mar 7, 2015
