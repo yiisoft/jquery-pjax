@@ -7,6 +7,7 @@ yii-pjax Change Log
 - Bug #21: Fixed non-persistence of `cache` option after backward navigation (nkovacs)
 - Bug #23: Fixed loading of scripts in pjax containers (nkovacs, silverfire)
 - Enh #25: Blur the focused element if it's inside Pjax container (GeorgeGardiner)
+- Enh #27: Added `pushRedirect`, `replaceRedirectOptions` options (beowulfenator)
 - New: Added `skipOuterContainers` option (silverfire)
 
 2.0.3 Mar 7, 2015

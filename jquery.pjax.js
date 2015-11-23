@@ -26,8 +26,8 @@
 //             replace - Want to use replaceState instead? That's cool.
 //             history - Work with window.history. Defaults to true
 //               cache - Whether to cache pages HTML. Defaults to true
-//        pushRedirect - Whether to pushState the URL for redirects. Defaults to false.
-//     replaceRedirect - Whether to replaceState the URL for redirects. Defaults to true.
+//        pushRedirect - Whether to add a browser history entry upon redirect. Defaults to false.
+//     replaceRedirect - Whether to replace URL without adding a browser history entry upon redirect. Defaults to true.
 // skipOuterContainers - When pjax containers are nested and this option is true,
 //                       the closest pjax block will handle the event. Otherwise, the top
 //                       container will handle the event. Defaults to false.
