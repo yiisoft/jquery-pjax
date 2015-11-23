@@ -202,7 +202,6 @@ function pjax(options) {
   // confuse the two.
   if (!options.data) options.data = {}
   if ($.isArray(options.data)) {
-    options.data = $.grep(options.data, function(obj) { return '_pjax' !== obj.name })
     options.data.push({name: '_pjax', value: context.selector})
   } else {
     options.data._pjax = context.selector
