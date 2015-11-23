@@ -384,8 +384,6 @@ function pjax(options) {
   // Cancel the current request if we're already pjaxing
   abortXHR(pjax.xhr)
 
-  // Strip _pjax parameter from URL, if exists.
-  options.url = stripInternalParams(options.url);
   pjax.options = options
   var xhr = pjax.xhr = $.ajax(options)
 
@@ -425,7 +423,7 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url) {
-  if(!pjax.options.history) return;
+  if (!pjax.options.history) return;
   window.history.replaceState(null, "", pjax.state.url)
   window.location.replace(url)
 }
@@ -772,7 +770,7 @@ function extractContainer(data, xhr, options) {
     // Then scrub any titles from their descendants
     obj.contents.find('title').remove()
 
-    // Gather all script[src] elements
+    // Gather all script elements
     obj.scripts = findAll(obj.contents, 'script').remove()
     obj.contents = obj.contents.not(obj.scripts)
   }
@@ -852,7 +850,7 @@ var cacheBackStack    = []
 //
 // Returns nothing.
 function cachePush(id, value) {
-  if(!pjax.options.cache) {
+  if (!pjax.options.cache) {
     return;
   }
   cacheMapping[id] = value
