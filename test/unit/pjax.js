@@ -16,684 +16,486 @@ if ($.support.pjax) {
     }
   })
 
-
-  asyncTest("pushes new url", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("pushes new url", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main", cache: false }, function(frame) {
       equal(frame.location.pathname, "/hello.html")
       equal(frame.location.search, "")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main",
-      cache: false
     })
   })
 
-  asyncTest("replaces container html from response data", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("replaces container html from response data", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
       equal(frame.$("#main").contents().eq(1).text().trim(), "How's it going?")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
     })
   })
 
-  asyncTest("sets title to response title tag", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("sets title to response title tag", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
       equal(frame.document.title, "Hello")
-      ok(!frame.$("#main title").length)
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+      equal(frame.$("#main title").length, 0)
     })
   })
 
-  asyncTest("sets title to response nested title tag", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("sets title to response nested title tag", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "nested_title.html", container: "#main" }, function(frame) {
       equal(frame.document.title, "Hello")
-      ok(!frame.$("#main title").length)
-      start()
-    })
-    frame.$.pjax({
-      url: "nested_title.html",
-      container: "#main"
+      equal(frame.$("#main title").length, 0)
     })
   })
 
-  asyncTest("sets title to response last title tag", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("sets title to response last title tag", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "double_title.html", container: "#main" }, function(frame) {
       equal(frame.document.title, "World!")
-      ok(!frame.$("#main title").length)
-      start()
-    })
-    frame.$.pjax({
-      url: "double_title.html",
-      container: "#main"
+      equal(frame.$("#main title").length, 0)
     })
   })
 
-  asyncTest("scrolls to top of page", function() {
-    var frame = this.frame
+  asyncTest("scrolls to top of page", 2, function() {
+    this.frame.scrollTo(0, 100)
+    equal(this.frame.pageYOffset, 100)
 
-    frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.window.scrollY, 0)
-      start()
-    })
-    frame.$.pjax({
-      url: "long.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "long.html", container: "#main" }, function(frame) {
+      equal(frame.pageYOffset, 0)
     })
   })
 
-  asyncTest("preserves current scroll position", function() {
-    var frame = this.frame
+  asyncTest("scrollTo: false avoids changing current scroll position", 2, function() {
+    this.frame.scrollTo(0, 100)
+    equal(this.frame.pageYOffset, 100)
 
-    frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.window.scrollY, 100)
-      start()
-    })
-    frame.$.pjax({
-      url: "long.html",
-      container: "#main",
-      scrollTo: false
+    navigate(this.frame)
+    .pjax({ url: "long.html", scrollTo: false, container: "#main" }, function(frame) {
+      equal(frame.window.pageYOffset, 100)
     })
   })
 
-  asyncTest("evals scripts", function() {
-    var frame = this.frame
-
-    frame.evaledScriptLoaded = function() {
-      equal(frame.evaledSrcScriptNum, 2)
-      deepEqual(frame.evaledInlineLog, ["one"])
-
-      frame.$.pjax({
-        url: "scripts.html?name=two",
-        container: "#main"
-      })
-
-      frame.$("#main").one("pjax:end", function() {
-        deepEqual(frame.evaledInlineLog, ["one", "two"])
-
-        goBack(frame, function() {
-          deepEqual(frame.evaledInlineLog, ["one", "two", "one"])
-
-          goForward(frame, function() {
-            deepEqual(frame.evaledInlineLog, ["one", "two", "one", "two"])
-            equal(frame.evaledSrcScriptNum, 2)
-            start()
-          })
-        })
-      })
+  asyncTest("evals scripts", 7, function() {
+    var externalLoadedCount = 0
+    this.frame.externalScriptLoaded = function() {
+      externalLoadedCount++
     }
 
-    frame.$.pjax({
-      url: "scripts.html?name=one",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "scripts.html?name=one", container: "#main" }, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one"])
+      equal(externalLoadedCount, 0)
+      return new PoorMansPromise(function(resolve) {
+        setTimeout(resolve, 100)
+      }).then(function() {
+        equal(externalLoadedCount, 2, "expected scripts to have loaded")
+      })
+    })
+    .pjax({ url: "scripts.html?name=two", container: "#main" }, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two"])
+    })
+    .back(-1, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two", "one"])
+    })
+    .back(+1, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two", "one", "two"])
+      return new PoorMansPromise(function(resolve) {
+        setTimeout(resolve, 100)
+      }).then(function() {
+        equal(externalLoadedCount, 2, "expected no extra scripts to load")
+      })
     })
   })
 
+  asyncTest("container option accepts jQuery object", 1, function() {
+    var container = this.frame.$("#main")
 
-  asyncTest("container option accepts String selector", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: container }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
     })
   })
 
-  asyncTest("container option accepts jQuery object", function() {
-    var frame = this.frame
+  asyncTest("container option accepts DOM element with ID", 1, function() {
+    var container = this.frame.document.getElementById("main")
 
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: container }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: frame.$("#main")
     })
   })
 
-  asyncTest("container option accepts Element with ID", function() {
-    var frame = this.frame
+  asyncTest("url option accepts function", 2, function() {
+    var numCalls = 0
+    var url = function() {
+      numCalls++
+      return "hello.html"
+    }
 
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ url: url, container: "#main" }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: frame.document.getElementById("main")
+      equal(numCalls, 1)
     })
   })
 
-  asyncTest("url option accepts function", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: function() { return "hello.html" },
-      container: "#main"
-    })
-  })
-
-
-  asyncTest("sets X-PJAX header on XHR request", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("sets X-PJAX header on XHR request", 1, function() {
+    navigate(this.frame)
+    .pjax({ url: "env.html", container: "#main" }, function(frame) {
       var env = JSON.parse(frame.$("#env").text())
-      ok(env['HTTP_X_PJAX'])
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      container: "#main"
+      equal(env["HTTP_X_PJAX"], "true")
     })
   })
 
-  asyncTest("sets X-PJAX-Container header to container on XHR request", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("sets X-PJAX-Container header to container on XHR request", 1, function() {
+    navigate(this.frame)
+    .pjax({ url: "env.html", container: "#main" }, function(frame) {
       var env = JSON.parse(frame.$("#env").text())
-      equal(env['HTTP_X_PJAX_CONTAINER'], "#main")
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      container: "#main"
+      equal(env["HTTP_X_PJAX_CONTAINER"], "#main")
     })
   })
 
   asyncTest("sets hidden _pjax param on XHR GET request", 1, function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ data: undefined, url: "env.html", container: "#main" }, function(frame) {
       var env = JSON.parse(frame.$("#env").text())
-      equal(env['rack.request.query_hash']['_pjax'], '#main')
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      data: undefined,
-      container: "#main"
+      equal(env["rack.request.query_hash"]["_pjax"], "#main")
     })
   })
 
   asyncTest("sets hidden _pjax param if array data is supplied", 1, function() {
-    var frame = this.frame
+    var data = [{ name: "foo", value: "bar" }]
 
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ data: data, url: "env.html", container: "#main" }, function(frame) {
       var env = JSON.parse(frame.$("#env").text())
-      deepEqual(env['rack.request.query_hash'], {
-        _pjax: '#main',
-        foo: 'bar'
+      deepEqual(env["rack.request.query_hash"], {
+        "_pjax": "#main"
+      , "foo": "bar"
       })
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      data: [{ name: "foo", value: "bar" }],
-      container: "#main"
     })
   })
 
   asyncTest("sets hidden _pjax param if object data is supplied", 1, function() {
-    var frame = this.frame
+    var data = { foo: "bar" }
 
-    frame.$('#main').on('pjax:success', function() {
+    navigate(this.frame)
+    .pjax({ data: data, url: "env.html", container: "#main" }, function(frame) {
       var env = JSON.parse(frame.$("#env").text())
-      deepEqual(env['rack.request.query_hash'], {
-        _pjax: '#main',
-        foo: 'bar'
-      })
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      data: { foo: "bar" },
-      container: "#main"
-    })
-  })
-
-  asyncTest("preserves query string on GET request", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.location.pathname, "/env.html")
-      equal(frame.location.search, "?foo=1&bar=2")
-
-      var env = JSON.parse(frame.$("#env").text())
-      equal(env['rack.request.query_hash']['foo'], '1')
-      equal(env['rack.request.query_hash']['bar'], '2')
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html?foo=1&bar=2",
-      container: "#main"
-    })
-  })
-
-  asyncTest("GET data is appended to query string", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.location.pathname, "/env.html")
-      equal(frame.location.search, "?foo=1&bar=2")
-
-      var env = JSON.parse(frame.$("#env").text())
-      equal(env['rack.request.query_hash']['foo'], '1')
-      equal(env['rack.request.query_hash']['bar'], '2')
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html",
-      data: { foo: 1, bar: 2 },
-      container: "#main"
-    })
-
-    // URL is set immediately
-    equal(frame.location.pathname, "/env.html")
-    equal(frame.location.search, "?foo=1&bar=2")
-  })
-
-  asyncTest("GET data is merged into query string", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.location.pathname, "/env.html")
-      equal(frame.location.search, "?foo=1&bar=2")
-
-      var env = JSON.parse(frame.$("#env").text())
-      equal(env['rack.request.query_hash']['foo'], '1')
-      equal(env['rack.request.query_hash']['bar'], '2')
-      start()
-    })
-    frame.$.pjax({
-      url: "env.html?foo=1",
-      data: { bar: 2 },
-      container: "#main"
-    })
-
-    // URL is set immediately
-    equal(frame.location.pathname, "/env.html")
-    equal(frame.location.search, "?foo=1&bar=2")
-  })
-
-  asyncTest("mixed containers", function() {
-    var frame = this.frame
-
-    frame.$.pjax({
-      url: "fragment.html",
-      container: "#main"
-    })
-
-    frame.$("#main").one("pjax:end", function() {
-      frame.$.pjax({
-        url: "aliens.html",
-        container: "#foo"
-      })
-
-      frame.$("#foo").one("pjax:end", function() {
-        equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
-
-        goBack(frame, function() {
-          equal(frame.$("#main > #foo").text().trim(), "Foo")
-
-          goBack(frame, function() {
-            equal(frame.$("#main > ul > li").first().text(), "home")
-
-            goForward(frame, function() {
-              goForward(frame, function() {
-                equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
-                start()
-              })
-            })
-          })
-        })
+      deepEqual(env["rack.request.query_hash"], {
+        "_pjax": "#main"
+      , "foo": "bar"
       })
     })
   })
 
-  asyncTest("only fragment is inserted", function() {
-    var frame = this.frame
+  asyncTest("preserves query string on GET request", 3, function() {
+    navigate(this.frame)
+    .pjax({ url: "env.html?foo=1&bar=2", container: "#main" }, function(frame) {
+      equal(frame.location.pathname, "/env.html")
+      equal(frame.location.search, "?foo=1&bar=2")
 
-    frame.$('#main').on('pjax:success', function(event, data) {
-      equal(typeof data, 'string')
+      var env = JSON.parse(frame.$("#env").text())
+      deepEqual(env["rack.request.query_hash"], {
+        "_pjax": "#main"
+      , "foo": "1"
+      , "bar": "2"
+      })
+    })
+  })
+
+  asyncTest("GET data is appended to query string", 6, function() {
+    var data = { foo: 1, bar: 2 }
+
+    navigate(this.frame)
+    .pjax({ data: data, url: "env.html", container: "#main" }, function(frame) {
+      equal(frame.location.pathname, "/env.html")
+      equal(frame.location.search, "?foo=1&bar=2")
+
+      var env = JSON.parse(frame.$("#env").text())
+      deepEqual(env["rack.request.query_hash"], {
+        "_pjax": "#main"
+      , "foo": "1"
+      , "bar": "2"
+      })
+    })
+
+    var frame = this.frame
+    setTimeout(function() {
+      // URL is set immediately
+      equal(frame.location.pathname, "/env.html")
+      equal(frame.location.search, "?foo=1&bar=2")
+      equal(frame.location.href.indexOf("#"), -1)
+    }, 0)
+  })
+
+  asyncTest("GET data is merged into query string", 6, function() {
+    var data = { bar: 2 }
+
+    navigate(this.frame)
+    .pjax({ data: data, url: "env.html?foo=1", container: "#main" }, function(frame) {
+      equal(frame.location.pathname, "/env.html")
+      equal(frame.location.search, "?foo=1&bar=2")
+
+      var env = JSON.parse(frame.$("#env").text())
+      deepEqual(env["rack.request.query_hash"], {
+        "_pjax": "#main"
+      , "foo": "1"
+      , "bar": "2"
+      })
+    })
+
+    var frame = this.frame
+    setTimeout(function() {
+      // URL is set immediately
+      equal(frame.location.pathname, "/env.html")
+      equal(frame.location.search, "?foo=1&bar=2")
+      equal(frame.location.href.indexOf("#"), -1)
+    }, 0)
+  })
+
+  asyncTest("mixed containers", 6, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", container: "#main" })
+    .pjax({ url: "aliens.html", container: "#foo" }, function(frame) {
+      equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
+    })
+    .back(-1, function(frame) {
+      equal(frame.$("#main > #foo").text().trim(), "Foo")
+    })
+    .pjax({ url: "env.html", replace: true, fragment: "#env", container: "#bar" }, function(frame) {
+      // This replaceState shouldn't affect restoring other popstates
+      equal(frame.$("#main > #foo").text().trim(), "Foo")
+      ok(JSON.parse(frame.$("#bar").text()))
+    })
+    .back(-1, function(frame) {
+      equal(frame.$("#main > ul > li").first().text(), "home")
+    })
+    .back(+1)
+    .back(+1, function(frame) {
+      equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
+    })
+  })
+
+  asyncTest("only fragment is inserted", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "#main", container: "#main" }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#main",
-      container: "#main"
+      equal(frame.document.title, "Hello")
     })
   })
 
-  asyncTest("use body as fragment", function() {
-    var frame = this.frame
-
-    frame.$('body').on('pjax:success', function(event, data) {
-      equal(typeof data, 'string')
+  asyncTest("use body as fragment", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "body", container: "body" }, function(frame) {
       equal(frame.$("body > #main > p").html().trim(), "Hello!")
       equal(frame.document.title, "Hello")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "body",
-      container: "body"
     })
   })
 
-  asyncTest("fragment sets title to response title tag", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.document.title, "Hello")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#main",
-      container: "#main"
-    })
-  })
-
-  asyncTest("fragment sets title to response title attr", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("fragment sets title to response title attr", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", fragment: "#foo", container: "#main" }, function(frame) {
+      equal(frame.$("#main > p").html(), "Foo")
       equal(frame.document.title, "Foo")
-      equal(frame.$("#main p").html(), "Foo")
-      start()
-    })
-    frame.$.pjax({
-      url: "fragment.html",
-      fragment: "#foo",
-      container: "#main"
     })
   })
 
-  asyncTest("fragment sets title to response data-title attr", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("fragment sets title to response data-title attr", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", fragment: "#bar", container: "#main" }, function(frame) {
+      equal(frame.$("#main > p").html(), "Bar")
       equal(frame.document.title, "Bar")
-      equal(frame.$("#main p").html(), "Bar")
-      start()
-    })
-    frame.$.pjax({
-      url: "fragment.html",
-      fragment: "#bar",
-      container: "#main"
     })
   })
 
-  asyncTest("missing fragment falls back to full load", function() {
-    var frame = this.frame
+  asyncTest("missing fragment falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#missing",
-      container: "#main"
-    })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
-  })
-
-  asyncTest("missing data falls back to full load", function() {
-    var frame = this.frame
-
-    frame.$.pjax({
-      url: "empty.html",
-      container: "#main"
-    })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main").html().trim(), "")
-      equal(frame.location.pathname, "/empty.html")
-      start()
-    }
-  })
-
-  asyncTest("full html page falls back to full load", function() {
-    var frame = this.frame
-
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      container: "#main"
-    })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
-  })
-
-  asyncTest("header version mismatch does a full load", function() {
-    var frame = this.frame
-
-    frame.$.pjax.defaults.version = 'v2'
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
-  })
-
-
-  asyncTest("triggers pjax:start event from container", function() {
-    var frame = this.frame
-
-    var startCalled
-
-    frame.$("#main").on("pjax:start", function(event, xhr, options) {
-      startCalled = this
-
-      ok(event)
-      ok(xhr)
-      equal(options.url, "hello.html")
-    })
-    frame.$('#main').on('pjax:success', function() {
-      equal(startCalled, frame.$("#main")[0])
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "#missing", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
   })
 
-  asyncTest("triggers pjax:end event from container", function() {
-    var frame = this.frame
+  asyncTest("missing data falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    var endCalled
-
-    frame.$("#main").on("pjax:end", function(event, xhr, options) {
-      ok(event)
-      equal(xhr.status, 200)
-      equal(options.url, "hello.html")
-
-      equal(this, frame.$("#main")[0])
-
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "empty.html", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main").html().trim(), "")
+        equal(frame.location.pathname, "/empty.html")
+      })
     })
   })
 
-  asyncTest("sets relatedTarget to target", function() {
-    var frame = this.frame
+  asyncTest("full html page falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    var endCalled
-
-    frame.$("#main").on("pjax:end", function(event, xhr, options) {
-      ok(event)
-
-      equal(event.relatedTarget, frame.$("#main")[0])
-      equal(this, frame.$("#main")[0])
-
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main",
-      target: frame.$("#main")[0]
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
   })
 
-  asyncTest("triggers pjax:beforeSend event from container", function() {
-    var frame = this.frame
+  asyncTest("header version mismatch does a full load", 2, function() {
+    var iframe = this.iframe
+    this.frame.$.pjax.defaults.version = "v2"
 
-    frame.$("#main").on("pjax:beforeSend", function(event, xhr, settings, options) {
-      ok(event)
-      ok(xhr)
-      equal(settings.url, "hello.html?_pjax=%23main")
-    })
-    frame.$("#main").on("pjax:success", function() {
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
   })
 
-  asyncTest("stopping pjax:beforeSend prevents the request", function() {
-    var frame = this.frame
+  asyncTest("triggers pjax:start/end events from container", 12, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
 
-    frame.$("#main").on("pjax:beforeSend", function(event, xhr) {
-      ok(true)
-      setTimeout(start, 0)
+    this.frame.$(container).on("pjax:start pjax:end", function(event, xhr, options) {
+      eventLog.push(arguments)
+    })
+
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
+      equal(eventLog.length, 2)
+      $.each(["pjax:start", "pjax:end"], function(i, expectedType) {
+        (function(event, xhr, options){
+          equal(event.type, expectedType)
+          equal(event.target, container)
+          equal(event.relatedTarget, null)
+          equal(typeof xhr.abort, "function")
+          equal(options.url, "hello.html")
+        }).apply(this, eventLog[i])
+      })
+    })
+  })
+
+  asyncTest("events preserve explicit target as relatedTarget", 7, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
+
+    this.frame.$(container).on("pjax:start pjax:end", function(event, xhr, options) {
+      eventLog.push(event)
+    })
+
+    navigate(this.frame)
+    .pjax({ url: "hello.html", target: container, container: "#main" }, function(frame) {
+      $.each(["pjax:start", "pjax:end"], function(i, expectedType) {
+        var event = eventLog[i]
+        equal(event.type, expectedType)
+        equal(event.target, container)
+        equal(event.relatedTarget, container)
+      })
+    })
+  })
+
+  asyncTest("stopping pjax:beforeSend prevents the request", 6, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
+
+    this.frame.$(container).on("pjax:beforeSend", function(event, xhr, settings) {
+      eventLog.push(arguments)
       return false
     })
-    frame.$("#main").on("pjax:success", function() {
+
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
       ok(false)
     })
 
-    this.iframe.onload = function() { ok(false) }
+    setTimeout(function() {
+      equal(eventLog.length, 1)
+      ;(function(event, xhr, settings){
+        equal(event.type, "pjax:beforeSend")
+        equal(event.target, container)
+        equal(typeof xhr.abort, "function")
+        equal(settings.dataType, "html")
+      }).apply(this, eventLog[0])
+      start()
+    }, 100)
+  })
 
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+  asyncTest("triggers pjax:beforeReplace event from container", 9, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
+
+    this.frame.$(container).on("pjax:beforeReplace", function(event, contents, options) {
+      eventLog.push(arguments)
+      equal(container.textContent.indexOf("Hello!"), -1)
+    })
+
+    var urlPrefix = location.protocol + "//" + location.host
+
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
+      equal(eventLog.length, 1)
+
+      ;(function(event, contents, options){
+        equal(event.target, container)
+        equal(event.state.url, urlPrefix + "/hello.html")
+        equal(event.previousState.url, urlPrefix + "/home.html")
+        equal(contents[0].nodeName, "P")
+        // FIXME: Should this be absolute URL?
+        equal(options.url, "hello.html")
+      }).apply(this, eventLog[0])
+
+      ok(container.textContent.indexOf("Hello!") >= 0)
     })
   })
 
-  asyncTest("triggers pjax:beforeReplace event from container", function() {
-    var frame = this.frame,
-        beforeContent = 'foo'
+  asyncTest("triggers pjax:success/complete events from container", function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
 
-    frame.$("#main")
-         .text(beforeContent)
-         .on("pjax:beforeReplace", function(event, contents, options) {
-      ok(event)
-      ok(contents)
-      equal($(event.target).text(), beforeContent)
-      equal(options.url, "hello.html")
-
-      ok(event.state.url.match("/hello.html"))
-      ok(event.previousState.url.match("/home.html"))
-      ok(frame.$.pjax.state.url.match("/hello.html"))
-    })
-    frame.$("#main").on("pjax:success", function(event) {
-      notEqual($(event.target).text(), beforeContent)
-      start()
+    this.frame.$(container).on("pjax:success pjax:complete", function(event) {
+      eventLog.push(arguments)
     })
 
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-  })
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
+      equal(eventLog.length, 2)
 
-  asyncTest("triggers pjax:success event from container", function() {
-    var frame = this.frame
+      ;(function(event, data, status, xhr, options){
+        equal(event.type, "pjax:success")
+        equal(event.target, container)
+        ok(data.indexOf("<p>Hello!</p>") >= 0)
+        equal(status, "success")
+        equal(typeof xhr.abort, "function")
+        equal(options.url, "hello.html")
+      }).apply(this, eventLog[0])
 
-    stop()
-    frame.$("#main").on("pjax:success", function(event, data, status, xhr, options) {
-      ok(event)
-      ok(data)
-      equal(status, 'success')
-      equal(xhr.status, 200)
-      equal(options.url, "hello.html")
-      start()
-    })
-    frame.$("#main").on("pjax:success", function(event, data, status, xhr) {
-      ok(data)
-      equal(status, 'success')
-      equal(xhr.status, 200)
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-  })
-
-  asyncTest("triggers pjax:complete event from container", function() {
-    var frame = this.frame
-
-    frame.$("#main").on("pjax:complete", function(event, xhr, status, options) {
-      ok(event)
-      equal(xhr.status, 200)
-      equal(status, 'success')
-      equal(options.url, "hello.html")
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+      ;(function(event, xhr, status, options){
+        equal(event.type, "pjax:complete")
+        equal(event.target, container)
+        equal(typeof xhr.abort, "function")
+        equal(status, "success")
+        equal(options.url, "hello.html")
+      }).apply(this, eventLog[1])
     })
   })
 
@@ -842,13 +644,6 @@ if ($.support.pjax) {
     }, 0)
   }
 
-  function goForward(frame, callback) {
-    setTimeout(function() {
-      frame.$("#main").one("pjax:end", callback)
-      frame.history.forward()
-    }, 0)
-  }
-
   asyncTest("clicking back while loading cancels XHR", function() {
     var frame = this.frame
 
@@ -889,138 +684,83 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("popstate going back to page", function() {
-    var frame = this.frame
+  asyncTest("popstate going back/forward in history", 14, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
 
-    equal(frame.location.pathname, "/home.html")
-    equal(frame.document.title, "Home")
+    this.frame.$(container).on("pjax:popstate", function(event) {
+      eventLog.push(event)
+    })
 
-    frame.$("#main").on("pjax:complete", function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function(frame) {
       equal(frame.location.pathname, "/hello.html")
       equal(frame.document.title, "Hello")
-
-      ok(frame.history.length > 1)
-      goBack(frame, function() {
-        equal(frame.location.pathname, "/home.html")
-        equal(frame.document.title, "Home")
-        start()
-      })
+      equal(eventLog.length, 0)
     })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-  })
-
-  asyncTest("popstate going forward to page", function() {
-    var frame = this.frame
-
-    equal(frame.location.pathname, "/home.html")
-    equal(frame.document.title, "Home")
-
-    frame.$("#main").on("pjax:complete", function() {
-      equal(frame.location.pathname, "/hello.html")
-      equal(frame.document.title, "Hello")
-
-      ok(frame.history.length > 1)
-      goBack(frame, function() {
-        goForward(frame, function() {
-          equal(frame.location.pathname, "/hello.html")
-          equal(frame.document.title, "Hello")
-          start()
-        })
-      })
-    })
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-  })
-
-  asyncTest("popstate preserves scroll position", function() {
-    var frame = this.frame
-
-    equal(frame.location.pathname, "/home.html")
-
-    frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
-
-    frame.$("#main").on("pjax:complete", function() {
-      equal(frame.location.pathname, "/long.html")
-      equal(frame.window.scrollY, 0)
-
-      ok(frame.history.length > 1)
-      goBack(frame, function() {
-        equal(frame.location.pathname, "/home.html")
-
-        // PENDING: Popstate scroll position restore doesn't seem to
-        // work inside an iframe.
-        // equal(frame.window.scrollY, 100)
-
-        start()
-      })
-    })
-    frame.$.pjax({
-      url: "long.html",
-      container: "#main"
-    })
-  })
-
-  asyncTest("popstate going back to page triggers pjax:popstate event", function() {
-    var frame = this.frame
-
-    equal(frame.location.pathname, "/home.html")
-
-    frame.$('#main').on("pjax:complete", function() {
-      equal(frame.location.pathname, "/hello.html")
-
-      ok(frame.history.length > 1)
-      goBack(frame, function() {})
-    })
-    frame.$('#main').on('pjax:popstate', function(event) {
+    .back(-1, function(frame) {
       equal(frame.location.pathname, "/home.html")
-      equal(event.state.container, '#main')
-      equal(event.direction, 'back')
-      start()
+      equal(frame.document.title, "Home")
+      equal(eventLog.length, 1)
+      equal(eventLog[0].direction, "back")
+      equal(eventLog[0].state.container, "#main")
     })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    .back(+1, function(frame) {
+      equal(frame.location.pathname, "/hello.html")
+      equal(frame.document.title, "Hello")
+      equal(eventLog.length, 2)
+      equal(eventLog[1].direction, "forward")
+      equal(eventLog[1].state.container, "#main")
     })
   })
 
-  asyncTest("popstate triggers pjax:beforeReplace event", function() {
-    var frame = this.frame,
-        originalContent = $(frame).html()
+  asyncTest("popstate restores original scroll position", 2, function() {
+    this.frame.scrollTo(0, 100)
+    equal(this.frame.pageYOffset, 100)
 
-    equal(frame.location.pathname, "/home.html")
+    navigate(this.frame)
+    .pjax({ url: "long.html", container: "#main" }, function(frame) {
+      equal(frame.pageYOffset, 0)
+    })
+    .back(-1, function(frame) {
+      // FIXME: Seems like this functionality is natively broken in PhantomJS and Safari
+      // equal(frame.pageYOffset, 100)
+    })
+  })
 
-    frame.$('#main').on("pjax:complete", function() {
-      equal(frame.location.pathname, "/hello.html")
-      ok(frame.history.length > 1)
+  asyncTest("popstate triggers pjax:beforeReplace event", 10, function() {
+    var eventLog = []
+    var container = this.frame.document.getElementById("main")
+    ok(container)
 
-      frame.$('#main').on('pjax:beforeReplace', function(event, contents, options) {
-        ok(event)
-        ok(contents)
-        equal(frame.location.pathname, "/home.html")
-        ok(options.url.match("/home.html"))
-        // Remember: the content hasn't yet been replaced.
-        notEqual($(event.target).html(), originalContent)
-
-        ok(event.state.url.match("/home.html"))
-        ok(event.previousState.url.match("/hello.html"))
-        ok(frame.$.pjax.state.url.match("/home.html"))
-
-        start()
-      })
-
-      goBack(frame, function() {})
+    this.frame.$(container).on("pjax:beforeReplace", function(event, contents, options) {
+      eventLog.push(arguments)
+      if (eventLog.length == 2) {
+        equal(container.textContent.indexOf("home"), -1)
+      }
     })
 
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    var urlPrefix = location.protocol + "//" + location.host
+
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" })
+    .back(-1, function(frame) {
+      equal(eventLog.length, 2)
+
+      // FIXME: First "pjax:beforeReplace" event has relative URL,
+      // while the 2nd (triggered by popstate) has absolute URL.
+      equal(eventLog[0][2].url, "hello.html")
+
+      ;(function(event, contents, options){
+        equal(event.target, container)
+        equal(event.previousState.url, urlPrefix + "/hello.html")
+        equal(event.state.url, urlPrefix + "/home.html")
+        equal(contents[1].nodeName, "UL")
+        equal(options.url, urlPrefix + "/home.html")
+      }).apply(this, eventLog[1])
+
+      ok(container.textContent.indexOf("home") >= 0)
     })
   })
 
@@ -1198,44 +938,6 @@ if ($.support.pjax) {
     frame.$.pjax({url: "hello.html", container: "#main"})
   })
 
-  asyncTest("popstate preserves GET data", function() {
-    var frame = this.frame
-
-    frame.$('#main').one("pjax:complete", function() {
-      equal(frame.location.pathname, "/env.html")
-      equal(frame.location.search, "?foo=1&bar=2")
-
-      var env = JSON.parse(frame.$("#env").text())
-      equal(env['rack.request.query_hash']['foo'], '1')
-      equal(env['rack.request.query_hash']['bar'], '2')
-
-      frame.$('#main').one("pjax:complete", function() {
-        equal(frame.location.pathname, "/hello.html")
-
-        ok(frame.history.length > 2)
-        goBack(frame, function() {
-          equal(frame.location.pathname, "/env.html")
-          equal(frame.location.search, "?foo=1&bar=2")
-
-          var env = JSON.parse(frame.$("#env").text())
-          equal(env['rack.request.query_hash']['foo'], '1')
-          equal(env['rack.request.query_hash']['bar'], '2')
-
-          start()
-        })
-      })
-      frame.$.pjax({
-        url: "hello.html",
-        container: "#main"
-      })
-    })
-    frame.$.pjax({
-      url: "env.html?foo=1",
-      data: { bar: 2 },
-      container: "#main"
-    })
-  })
-
   asyncTest("lazily sets initial $.pjax.state", function() {
     var frame = this.frame
 
@@ -1387,6 +1089,14 @@ if ($.support.pjax) {
     frame.$.pjax({
       url: "boom_sans_pjax.html",
       container: "#main"
+    })
+  })
+
+  asyncTest("copes with ampersands when pushing urls", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "/some-&-path/hello.html", container: "#main" }, function(frame) {
+      equal(frame.location.pathname, "/some-&-path/hello.html")
+      equal(frame.location.search, "")
     })
   })
 }
