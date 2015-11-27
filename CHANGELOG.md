@@ -8,6 +8,7 @@ yii-pjax Change Log
 - Bug #23: Fixed loading of scripts in pjax containers (nkovacs, silverfire)
 - Enh #25: Blur the focused element if it's inside Pjax container (GeorgeGardiner)
 - Enh #27: Added `pushRedirect`, `replaceRedirectOptions` options (beowulfenator)
+- Chg: JavaScripts load through PJAX will be processed by `jQuery.ajaxPrefiler` when it's configured (silverfire)
 - New: Added `skipOuterContainers` option (silverfire)
 
 2.0.3 Mar 7, 2015

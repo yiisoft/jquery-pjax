@@ -807,18 +807,9 @@ function executeScriptTags(scripts, context) {
       return
     }
 
-    if (this.src) {
-      var script = document.createElement('script')
-      var type = $(this).attr('type')
-      if (type) script.type = type
-      var done = function () {
-        script.onload = null;
-        script.onerror = null;
-        next()
-      }
-      script.onload = script.onerror = done
-      script.src = $(this).attr('src')
-      document.head.appendChild(script)
+    if (src) {
+      $.getScript(src).done(next).fail(next)
+      document.head.appendChild(this)
     } else {
       context.append(this)
       next()
@@ -988,3 +979,4 @@ $.support.pjax =
 $.support.pjax ? enable() : disable()
 
 })(jQuery);
+
