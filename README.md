@@ -1,4 +1,4 @@
-# pjax = pushState + ajax
+# pjax = pushState + ajax, Yii 2.0 fork with enhancements
 
 
             .--.
@@ -86,9 +86,9 @@ Also check out [RailsCasts #294: Playing with PJAX][railscasts].
 
 ## Installation
 
-### Yii2
+### Yii 2.0
 
-By default this comes preinstalled on the Yii2 Framework basic and advanced templates. [You can follow the installation guide](http://www.yiiframework.com/doc-2.0/guide-start-installation.html)
+There's no need to install library manually since it comes pre-installed with Yii 2.0.
 
 ### bower
 
@@ -96,43 +96,6 @@ Via [Bower][]:
 
 ```
 $ bower install yii2-pjax
-```
-
-Or, add `yii2-pjax` to your app's `bower.json`.
-
-``` json
-  "dependencies": {
-    "yii2-pjax": "latest"
-  }
-```
-
-### Composer
-
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix).
-
-Then you need to install the composer asset plugin
-
-~~~
-php composer.phar global require "fxp/composer-asset-plugin:~1.1.1"
-~~~
-
-After that you can run
-
-~~~
-php composer.phar require --prefer-dist "bower-asset/yii2-pjax:*"
-~~~
-
-or add
-
-~~~
-"bower-asset/yii2-pjax": "*"
-~~~
-
-To your composer.json file.
-
-```
-$ composer install yii2-pjax
 ```
 
 Or, add `yii2-pjax` to your app's `bower.json`.
