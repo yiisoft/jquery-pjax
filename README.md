@@ -179,6 +179,7 @@ key | default | description
 `pushRedirect` | false | whether to add a browser history entry upon redirect
 `replaceRedirect` | true | whether to replace URL without adding a browser history entry upon redirect
 `skipOuterContainers` | false | When pjax containers are nested and this option is true, the closest pjax block will handle the event. Otherwise, the top container will handle the event
+`ieRedirectCompatibility` | true | Whether to add `X-Ie-Redirect-Compatibility` header for the request on IE. Fixes IE error on 302 redirect without `Location` header
 
 You can change the defaults globally by writing to the `$.pjax.defaults` object:
 
