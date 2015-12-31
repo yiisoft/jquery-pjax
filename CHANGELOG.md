@@ -6,6 +6,7 @@ yii-pjax Change Log
 - Bug #15: Fixed duplication of `_pjax` GET variable (Alex-Code)
 - Bug #21: Fixed non-persistence of `cache` option after backward navigation (nkovacs)
 - Bug #23: Fixed loading of scripts in pjax containers (nkovacs, silverfire)
+- Bug #37: Added `X-Ie-Redirect-Compatibility` header for IE. Fixes error on 302 redirect without `Location` header (silverfire)
 - Enh #25: Blur the focused element if it's inside Pjax container (GeorgeGardiner)
 - Enh #27: Added `pushRedirect`, `replaceRedirectOptions` options (beowulfenator)
 - Chg: JavaScripts load through PJAX will be processed by `jQuery.ajaxPrefiler` when it's configured (silverfire)

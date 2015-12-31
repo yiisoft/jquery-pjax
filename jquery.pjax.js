@@ -19,18 +19,20 @@
 // pjax specific options:
 //
 //
-//           container - Where to stick the response body. Usually a String selector.
-//                       $(container).html(xhr.responseBody)
-//                       (default: current jquery context)
-//                push - Whether to pushState the URL. Defaults to true (of course).
-//             replace - Want to use replaceState instead? That's cool.
-//             history - Work with window.history. Defaults to true
-//               cache - Whether to cache pages HTML. Defaults to true
-//        pushRedirect - Whether to add a browser history entry upon redirect. Defaults to false.
-//     replaceRedirect - Whether to replace URL without adding a browser history entry upon redirect. Defaults to true.
-// skipOuterContainers - When pjax containers are nested and this option is true,
-//                       the closest pjax block will handle the event. Otherwise, the top
-//                       container will handle the event. Defaults to false.
+//               container - Where to stick the response body. Usually a String selector.
+//                           $(container).html(xhr.responseBody)
+//                           (default: current jquery context)
+//                    push - Whether to pushState the URL. Defaults to true (of course).
+//                 replace - Want to use replaceState instead? That's cool.
+//                 history - Work with window.history. Defaults to true
+//                   cache - Whether to cache pages HTML. Defaults to true
+//            pushRedirect - Whether to add a browser history entry upon redirect. Defaults to false.
+//         replaceRedirect - Whether to replace URL without adding a browser history entry upon redirect. Defaults to true.
+//     skipOuterContainers - When pjax containers are nested and this option is true,
+//                           the closest pjax block will handle the event. Otherwise, the top
+//                           container will handle the event. Defaults to false.
+// ieRedirectCompatibility - Whether to add `X-Ie-Redirect-Compatibility` header for the request on IE.
+//                           See https://github.com/yiisoft/jquery-pjax/issues/37
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -227,6 +229,13 @@ function pjax(options) {
 
     xhr.setRequestHeader('X-PJAX', 'true')
     xhr.setRequestHeader('X-PJAX-Container', context.selector)
+
+    if (settings.ieRedirectCompatibility) {
+      var ua = window.navigator.userAgent
+      if (ua.indexOf('MSIE ') > 0 || ua.indexOf('Trident/') > 0 || ua.indexOf('Edge/') > 0) {
+        xhr.setRequestHeader('X-Ie-Redirect-Compatibility', 'true')
+      }
+    }
 
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
@@ -936,7 +945,8 @@ function enable() {
     version: findVersion,
     pushRedirect: false,
     replaceRedirect: true,
-    skipOuterContainers: false
+    skipOuterContainers: false,
+    ieRedirectCompatibility: true
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
