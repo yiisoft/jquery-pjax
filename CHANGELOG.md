@@ -1,6 +1,10 @@
 yii-pjax Change Log
 ===================
 
+Under development
+-----------------
+
+
 2.0.6 Mar 4, 2015
 -----------------
 - Bug #15: Fixed duplication of `_pjax` GET variable (Alex-Code)
