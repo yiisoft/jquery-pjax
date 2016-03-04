@@ -1,7 +1,7 @@
 yii-pjax Change Log
 ===================
 
-2.0.6 Under development
+2.0.6 Mar 4, 2015
 -----------------
 - Bug #15: Fixed duplication of `_pjax` GET variable (Alex-Code)
 - Bug #21: Fixed non-persistence of `cache` option after backward navigation (nkovacs)
