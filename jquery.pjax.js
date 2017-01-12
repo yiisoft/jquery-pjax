@@ -75,7 +75,7 @@ function handleClick(event, container, options) {
   var link = event.currentTarget
 
   // Ignore links with data-pjax="0"
-  if ($(link).data('pjax') == 0) {
+  if (parseInt($(link).data('pjax')) === 0) {
     return;
   }
 

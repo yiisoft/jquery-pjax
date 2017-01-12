@@ -3,7 +3,7 @@ yii-pjax Change Log
 
 Under development
 -----------------
-
+- Bug #46: Allow "data-pjax" attribute with no value in `handleClick` function (arogachev)
 
 2.0.6 Mar 4, 2016
 -----------------
