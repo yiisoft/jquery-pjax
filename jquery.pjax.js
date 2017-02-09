@@ -864,7 +864,6 @@ function loadStyles(styles, content, context, reapplyStyles, stylesHead) {
   
   if (reapplyStyles) {
       styles.each(function(){
-            content.prepend(this)
             if (stylesHead)
                 $('head').append(this)
             else
