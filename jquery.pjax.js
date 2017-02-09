@@ -40,7 +40,7 @@
 // Returns the jQuery object
 function fnPjax(selector, container, options) {
   var context = this
-  return $(selector).unbind('click.pjax').removeClass('data-pjax').on('click.pjax', function(event) {
+  $(selector).unbind('click.pjax').removeClass('data-pjax').on('click.pjax', function(event) {
     var opts = $.extend({history: true}, optionsFor(container, options))
     if (!opts.container)
       opts.container = $(this).attr('data-pjax') || context
