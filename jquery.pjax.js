@@ -290,9 +290,13 @@ function pjax(options) {
       $.pjax.defaults.version
 
     var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+    var reapplyStyles = xhr.getResponseHeader('X-PJAX-Stylesheets-Reapply')
+    var stylesHead = xhr.getResponseHeader('X-PJAX-Stylesheets-Head')
 
     var container = extractContainer(data, xhr, options)
 
+    loadStyles(container.stylesheets, container.contents, context, reapplyStyles, stylesHead)
+    
     var url = parseURL(container.url)
     if (hash) {
       url.hash = hash
@@ -783,6 +787,9 @@ function extractContainer(data, xhr, options) {
     // Gather all script elements
     obj.scripts = findAll(obj.contents, 'script').remove()
     obj.contents = obj.contents.not(obj.scripts)
+    // Gather all link elements
+    obj.stylesheets = findAll(obj.contents, 'link').remove()
+    obj.contents = obj.contents.not(obj.stylesheets)
   }
 
   // Trim any whitespace off the title
@@ -833,6 +840,62 @@ function executeScriptTags(scripts, context) {
     var script = scripts[i]
     i++
     cb.call(script, next)
+  }
+  next()
+}
+
+// add :parents selector
+jQuery.expr[':'].parents = function(a,i,m){
+    return jQuery(a).parents(m[3]).length < 1;
+};
+
+// Load stylesheets unless the stylesheets are already loaded or reapplyStyles is set to true.
+//
+//   stylesheets - jQuery object of link Elements
+//       content - the content returned from the server
+//       context - jQuery object whose context is `document` and has a selector
+// reapplyStyles - Reapply stylesheets that already exist
+//    stylesHead - Move stylesheets to head element so that they do not get removed in later pjax calls
+//
+// Returns nothing.
+
+function loadStyles(styles, content, context, reapplyStyles, stylesHead) {
+  if (!styles) return
+  
+  if (reapplyStyles) {
+      styles.each(function(){
+            if (stylesHead)
+                $('head').append(this)
+            else
+                content.prepend(this)
+      })
+      return
+  }
+  var existingStyles = $('link[href]').filter(':parents(' + context.selector + ')') 
+  var cb = function (next) {
+    var href = this.href
+    var matchedStyles = existingStyles.filter(function () {
+      return this.href === href
+    })
+    if (matchedStyles.length) {
+      next()
+      return
+    }
+    if (stylesHead)
+        $('head').append(this)
+    else
+        content.prepend(this)
+    next()
+  }
+
+  var i = 0;
+  var next = function () {
+    if (i >= styles.length) {
+      return
+    }
+    var style = styles[i]
+    i++
+    cb.call(style, next)
   }
   next()
 }
