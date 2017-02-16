@@ -169,8 +169,7 @@ key | default | description
 `replace` | false | replace URL without adding browser history entry
 `maxCacheLength` | 20 | maximum cache size for previous container contents
 `version` | | a string or function returning the current pjax version
-`scrollTo` | 0 | vertical position to scroll to after navigation. To avoid changing scroll position, pass `false`. If set to `true` page will scroll to the pjax container. 
-Can also be be a callback function with context and current hash passed in as parameters. E.g. `function (context, hash) { if (!hash) return $(context).offset().top; }`
+`scrollTo` | 0 | vertical position to scroll to after navigation. To avoid changing scroll position, pass `false`. If set to `true` page will scroll to the pjax container. Can also be be a callback function with context and current hash passed in as parameters. E.g. `function (context, hash) { if (!hash) return $(context).offset().top; }`
 `scrollOffset` | 0 | vertical offset that gets added to `scrollTo`. Can be a callback function with the current `scrollTo` value passed as a parameter.
 `type` | `"GET"` | see [$.ajax][]
 `dataType` | `"html"` | see [$.ajax][]
