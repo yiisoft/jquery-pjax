@@ -133,6 +133,10 @@ function handleClick(event, container, options) {
 //
 // Returns nothing.
 function handleSubmit(event, container, options) {
+  // check result of previous handlers
+  if (event.result === false)
+    return false;
+
   options = optionsFor(container, options)
 
   var form = event.currentTarget
