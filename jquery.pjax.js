@@ -40,9 +40,10 @@ function fnPjax(selector, container, options) {
   options = optionsFor(container, options)
   return this.on('click.pjax', selector, function(event) {
     var opts = options
-    if (!opts.container)
+    if (!opts.container) {
       opts = $.extend({history: true}, options)
       opts.container = $(this).attr('data-pjax')
+    }
     handleClick(event, opts)
   })
 }
@@ -367,7 +368,7 @@ function pjax(options) {
       if (target) scrollTo = $(target).offset().top
     }
 
-    if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
+    if (typeof scrollTo === 'number') $(window).scrollTop(scrollTo)
 
     fire('pjax:success', [data, status, xhr, options])
   }
@@ -661,11 +662,11 @@ function stripHash(location) {
 //
 // Returns options Object.
 function optionsFor(container, options) {
-  if ( container && options ) {
+  if (container && options) {
     options = $.extend({}, options)
     options.container = container
     return options
-  } else if ( $.isPlainObject(container) ) {
+  } else if ($.isPlainObject(container)) {
     return container
   } else {
     return {container: container}
@@ -755,7 +756,7 @@ function extractContainer(data, xhr, options) {
     // Then scrub any titles from their descendants
     obj.contents.find('title').remove()
 
-    // Gather all script elements
+    // Gather all script[src] elements
     obj.scripts = findAll(obj.contents, 'script').remove()
     obj.contents = obj.contents.not(obj.scripts)
   }
@@ -772,7 +773,6 @@ function extractContainer(data, xhr, options) {
 // globalEval.
 //
 // scripts - jQuery object of script Elements
-// context - jQuery object whose context is `document` and has a selector
 //
 // Returns nothing.
 function executeScriptTags(scripts, context) {
@@ -971,4 +971,3 @@ if ($.support.pjax) {
 }
 
 })(jQuery)
-
