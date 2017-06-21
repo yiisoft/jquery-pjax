@@ -1,5 +1,6 @@
 {
   "name": "yii2-pjax",
+  "description": "jQuery plugin for ajax + pushState navigation",
   "version": "2.0.7-dev",
   "main": "jquery.pjax.js",
   "repository": "yiisoft/jquery-pjax",
@@ -12,5 +13,11 @@
   "files" : [
     "LICENSE",
     "jquery.pjax.js"
-  ]
+  ],
+    "devDependencies": {
+      "eslint": "^3.19.0"
+    },
+  "scripts": {
+    "test": "./script/test"
+  }
 }

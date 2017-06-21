@@ -39,6 +39,7 @@
 function fnPjax(selector, container, options) {
   options = optionsFor(container, options)
   return this.on('click.pjax', selector, function(event) {
+    var opts = options
     if (!opts.container)
       opts = $.extend({history: true}, options)
       opts.container = $(this).attr('data-pjax')
@@ -74,8 +75,8 @@ function handleClick(event, container, options) {
     var $link = $(link)
 
   // Ignore links with data-pjax="0"
-  if (parseInt($(link).data('pjax')) === 0) {
-    return;
+  if (parseInt($link.data('pjax')) === 0) {
+    return
   }
 
   if (link.tagName.toUpperCase() !== 'A')
@@ -269,7 +270,7 @@ function pjax(options) {
   options.error = function(xhr, textStatus, errorThrown) {
     var container = extractContainer("", xhr, options)
     // Check redirect status code
-    var redirect = (xhr.status >= 301 && xhr.status <= 303)
+    var redirect = xhr.status >= 301 && xhr.status <= 303
     // Do not fire pjax::error in case of redirect
     var allowed = redirect || fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (redirect || options.type == 'GET' && textStatus !== 'abort' && allowed) {
@@ -283,11 +284,11 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
-    var previousState = pjax.state;
+    var previousState = pjax.state
 
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
-    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+    var currentVersion = typeof $.pjax.defaults.version === 'function' ?
       $.pjax.defaults.version() :
       $.pjax.defaults.version
 
@@ -435,7 +436,7 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url) {
-  if (!pjax.options.history) return;
+  if (!pjax.options.history) return
   window.history.replaceState(null, "", pjax.state.url)
   window.location.replace(url)
 }
@@ -608,7 +609,7 @@ function cloneContents(container) {
   // Unmark script tags as already being eval'd so they can get executed again
   // when restored from cache. HAXX: Uses jQuery internal method.
   cloned.find('script').each(function(){
-    if (!this.src) jQuery._data(this, 'globalEval', false)
+    if (!this.src) $._data(this, 'globalEval', false)
   })
   return cloned.contents()
 }
@@ -799,7 +800,7 @@ function executeScriptTags(scripts, context) {
     }
   }
 
-  var i = 0;
+  var i = 0
   var next = function () {
     if (i >= scripts.length) {
       return
@@ -826,7 +827,7 @@ var cacheBackStack    = []
 // Returns nothing.
 function cachePush(id, value) {
   if (!pjax.options.cache) {
-    return;
+    return
   }
   cacheMapping[id] = value
   cacheBackStack.push(id)
@@ -969,5 +970,5 @@ if ($.support.pjax) {
   disable()
 }
 
-})(jQuery);
+})(jQuery)
 
