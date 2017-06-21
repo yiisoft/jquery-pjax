@@ -25,11 +25,10 @@
 
 pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button.
 
-pjax works by grabbing html from your server via ajax and replacing the content
-of a container on your page with the ajax'd html. It then updates the browser's
-current URL using pushState without reloading your page's layout or any
-resources (JS, CSS), giving the appearance of a fast, full page load. But really
-it's just ajax and pushState.
+pjax works by fetching HTML from your server via ajax and replacing the content of a container element on your page with the loaded HTML. It then updates the current URL in the browser using pushState. This results in faster page navigation for two reasons:
+
+* No page resources (JS, CSS) get re-executed or re-applied;
+* If the server is configured for pjax, it can render only partial page contents and thus avoid the potentially costly full layout render.
 
 For [browsers that don't support pushState][compat] pjax fully degrades.
 
