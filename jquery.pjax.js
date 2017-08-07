@@ -40,12 +40,13 @@
 // Returns the jQuery object
 function fnPjax(selector, container, options) {
   var context = this
-  return this.on('click.pjax', selector, function(event) {
+  return $(selector).unbind('click.pjax').removeClass('data-pjax').on('click.pjax', function(event) {
     var opts = $.extend({history: true}, optionsFor(container, options))
     if (!opts.container)
       opts.container = $(this).attr('data-pjax') || context
     handleClick(event, opts)
   })
+  return this
 }
 
 // Public: pjax on click handler
@@ -132,6 +133,10 @@ function handleClick(event, container, options) {
 //
 // Returns nothing.
 function handleSubmit(event, container, options) {
+  // check result of previous handlers
+  if (event.result === false)
+    return false;
+
   options = optionsFor(container, options)
 
   var form = event.currentTarget
