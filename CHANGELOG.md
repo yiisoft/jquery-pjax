@@ -41,3 +41,6 @@ Under development
 ------------------
 - Bug: Fixed avoid duplicates of _pjax parameter (tof06)
 - Bug: Fixed Pjax/GridView and back button (klevron, tof06, tonydspaniard)
+
+
+
