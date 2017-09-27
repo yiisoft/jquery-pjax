@@ -21,7 +21,8 @@
 //
 //               container - String selector for the element where to place the response body.
 //                    push - Whether to pushState the URL. Defaults to true (of course).
-//                 replace - Want to use replaceState instead? That's cool.//                 history - Work with window.history. Defaults to true
+//                 replace - Want to use replaceState instead? That's cool.
+//                 history - Work with window.history. Defaults to true
 //                   cache - Whether to cache pages HTML. Defaults to true
 //            pushRedirect - Whether to add a browser history entry upon redirect. Defaults to false.
 //         replaceRedirect - Whether to replace URL without adding a browser history entry upon redirect. Defaults to true.
@@ -37,14 +38,18 @@
 // Returns the jQuery object
 function fnPjax(selector, container, options) {
   options = optionsFor(container, options)
-  return this.on('click.pjax', selector, function(event) {
-    var opts = options
-    if (!opts.container) {
-      opts = $.extend({history: true}, options)
-      opts.container = $(this).attr('data-pjax')
-    }
-    handleClick(event, opts)
-  })
+  var handler = function(event) {
+      var opts = options
+      if (!opts.container) {
+          opts = $.extend({history: true}, options)
+          opts.container = $(this).attr('data-pjax')
+      }
+      handleClick(event, opts)
+  }
+  $(selector).removeClass('data-pjax');
+  return this
+      .off('click.pjax', selector, handler)
+      .on('click.pjax', selector, handler);
 }
 
 // Public: pjax on click handler
@@ -126,6 +131,10 @@ function handleClick(event, container, options) {
 //
 // Returns nothing.
 function handleSubmit(event, container, options) {
+  // check result of previous handlers
+  if (event.result === false)
+    return false;
+
   options = optionsFor(container, options)
 
   var form = event.currentTarget
