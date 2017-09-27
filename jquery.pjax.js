@@ -354,16 +354,29 @@ function pjax(options) {
     executeScriptTags(container.scripts, context)
     loadLinkTags(container.links)
 
-    var scrollTo = options.scrollTo
-
-    // Ensure browser scrolls to the element referenced by the URL anchor
-    if (hash) {
-      var name = decodeURIComponent(hash.slice(1))
-      var target = document.getElementById(name) || document.getElementsByName(name)[0]
-      if (target) scrollTo = $(target).offset().top
+    
+    if (typeof options.scrollTo === 'function') {
+        var scrollTo = options.scrollTo(context, hash)
+    } else {
+        var scrollTo = options.scrollTo
+        // Ensure browser scrolls to the element referenced by the URL anchor
+        if (hash || true === scrollTo) {
+          var name = decodeURIComponent(hash.slice(1))
+          var target = true === scrollTo ? context : (document.getElementById(name) || document.getElementsByName(name)[0])
+          if (target) scrollTo = $(target).offset().top
+        }
     }
 
-    if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
+    if (typeof options.scrollOffset === 'function')
+        var scrollOffset = options.scrollOffset(scrollTo)
+    else 
+        var scrollOffset = options.scrollOffset
+    
+    if (typeof scrollTo === 'number') {
+        scrollTo = scrollTo + scrollOffset;
+        if (scrollTo < 0) scrollTo = 0
+        $(window).scrollTop(scrollTo)
+    }
 
     fire('pjax:success', [data, status, xhr, options])
   }
@@ -937,6 +950,7 @@ function enable() {
     type: 'GET',
     dataType: 'html',
     scrollTo: 0,
+    scrollOffset: 0,
     maxCacheLength: 20,
     version: findVersion,
     pushRedirect: false,

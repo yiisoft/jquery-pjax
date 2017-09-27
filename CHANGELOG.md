@@ -5,6 +5,7 @@ Under development
 -----------------
 - Bug #46: Allow "data-pjax" attribute with no value in `handleClick` function (arogachev)
 - Enh #57: jQuery 3.x compatibility (a761208, silverfire)
+- Enh #51: Added `scrollOffset` option, updated `scrollTo` to support callback (derekisbusy)
 - Bug: Fixed stylesheets loading to prevent styles override (voskobovich, silverfire)
 - Merged updates from upstream. The update contains backward-incompatible changes, see [changes list](https://github.com/yiisoft/jquery-pjax/issues/55#issuecomment-310109608) to adjust your application accordingly. (silverfire)
 
