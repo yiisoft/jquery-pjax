@@ -823,11 +823,11 @@ function loadLinkTags(links) {
     var existingLinks = $('link[href]')
 
     links.each(function() {
-        var href = this.href
-        var matchedLinks = existingLinks.filter(function() {
-            return this.href === href
-        })
-        if (matchedLinks.length) return
+        var href = this.href,
+            alreadyLoadedLinks = existingLinks.filter(function() {
+                return this.href === href
+            })
+        if (alreadyLoadedLinks.length) return
 
         document.head.appendChild(this)
     })
