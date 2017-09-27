@@ -357,9 +357,9 @@ function pjax(options) {
     var scrollTo = options.scrollTo
 
     // Ensure browser scrolls to the element referenced by the URL anchor
-    if (hash) {
+    if (hash || true === scrollTo) {
       var name = decodeURIComponent(hash.slice(1))
-      var target = document.getElementById(name) || document.getElementsByName(name)[0]
+      var target = true === scrollTo ? context : (document.getElementById(name) || document.getElementsByName(name)[0])
       if (target) scrollTo = $(target).offset().top
     }
 
