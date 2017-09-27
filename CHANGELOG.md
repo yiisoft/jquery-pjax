@@ -6,6 +6,7 @@ Under development
 - Bug #46: Allow "data-pjax" attribute with no value in `handleClick` function (arogachev)
 - Bug #52: Fixed form submit handling to prevent submit when event result is `false` (derekisbusy)
 - Bug #52: Fixed PJAX initialization to prevent multiple PJAX handlers attachment on the same element (derekisbusy, silverfire)
+- Bug #54: Fixed PJAX initialization not to modify history, when it is disabled (silverfire)
 - Enh #57: jQuery 3.x compatibility (a761208, silverfire)
 - Enh #51: Added `scrollOffset` option, updated `scrollTo` to support callback (derekisbusy)
 - Bug: Fixed stylesheets loading to prevent styles override (voskobovich, silverfire)
