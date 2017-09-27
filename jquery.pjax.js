@@ -950,6 +950,7 @@ function enable() {
     type: 'GET',
     dataType: 'html',
     scrollTo: 0,
+    scrollOffset: 0,
     maxCacheLength: 20,
     version: findVersion,
     pushRedirect: false,
