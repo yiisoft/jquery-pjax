@@ -1,7 +1,7 @@
 yii-pjax Change Log
 ===================
 
-Under development
+2.0.7 Sep 27, 2017
 -----------------
 - Bug #46: Allow "data-pjax" attribute with no value in `handleClick` function (arogachev)
 - Bug #52: Fixed form submit handling to prevent submit when event result is `false` (derekisbusy)
