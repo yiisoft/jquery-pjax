@@ -352,6 +352,7 @@ function pjax(options) {
     }
 
     executeScriptTags(container.scripts, context)
+    loadLinkTags(container.links)
 
     var scrollTo = options.scrollTo
 
@@ -753,6 +754,10 @@ function extractContainer(data, xhr, options) {
     // Gather all script elements
     obj.scripts = findAll(obj.contents, 'script').remove()
     obj.contents = obj.contents.not(obj.scripts)
+
+    // Gather all link[href] elements
+    obj.links = findAll(obj.contents, 'link[href]').remove()
+    obj.contents = obj.contents.not(obj.links)
   }
 
   // Trim any whitespace off the title
@@ -805,6 +810,27 @@ function executeScriptTags(scripts, context) {
     cb.call(script, next)
   }
   next()
+}
+
+// Load an links using standard request.
+//
+// links - jQuery object of link Elements
+//
+// Returns nothing.
+function loadLinkTags(links) {
+    if (!links) return
+
+    var existingLinks = $('link[href]')
+
+    links.each(function() {
+        var href = this.href,
+            alreadyLoadedLinks = existingLinks.filter(function() {
+                return this.href === href
+            })
+        if (alreadyLoadedLinks.length) return
+
+        document.head.appendChild(this)
+    })
 }
 
 // Internal: History DOM caching class.
