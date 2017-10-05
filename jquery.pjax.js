@@ -1015,4 +1015,4 @@ if ($.support.pjax) {
   disable()
 }
 
-})(jQuery)
+})(jQuery);
