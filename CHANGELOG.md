@@ -1,6 +1,12 @@
 yii-pjax Change Log
 ===================
 
+2.0.8 under development
+-----------------------
+
+- no changes in this release.
+
+
 v2.0.7.1 under development
 ------------------------
 - Bug #61: Restore the last semicolon for Yii asset/compress (tanakahisateru)
