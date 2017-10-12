@@ -1,9 +1,9 @@
 yii-pjax Change Log
 ===================
 
-v2.0.8 under development
+v2.0.7.1 under development
 ------------------------
-- no changes in this release.
+- Bug #61: Restore the last semicolon for Yii asset/compress (tanakahisateru)
 
 2.0.7 Sep 27, 2017
 -----------------
@@ -45,6 +45,4 @@ v2.0.8 under development
 ------------------
 - Bug: Fixed avoid duplicates of _pjax parameter (tof06)
 - Bug: Fixed Pjax/GridView and back button (klevron, tof06, tonydspaniard)
-
-
 
