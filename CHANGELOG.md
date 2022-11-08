@@ -1,6 +1,11 @@
 yii-pjax Change Log
 ===================
 
+2.0.9 Nov 8, 2022
+-----------------
+
+- Bug #71: Wrong events lifecycle in case when ajax request is not async (iovzt)
+
 2.0.8 under development
 -----------------------
 
