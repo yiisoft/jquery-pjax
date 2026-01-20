@@ -1,8 +1,8 @@
 yii-pjax Change Log
 ===================
 
-2.0.9 under development
------------------------
+2.0.9 Jan 21, 2026
+------------------
 
 - Chg #73: Update dependencies for Sinatra and Rack (craiglondon)
 
